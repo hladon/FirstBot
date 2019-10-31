@@ -9,9 +9,22 @@ import org.telegram.telegrambots.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 
 public class Bot extends TelegramLongPollingBot {
+
+
+    private static final ScheduledExecutorService schedule= Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService scheduler =
+            Executors.newScheduledThreadPool(1);
+
+    private Long str=null;
 
 
     public void onUpdateReceived(Update update) {
@@ -21,12 +34,33 @@ public class Bot extends TelegramLongPollingBot {
             message=generateMessage(update);
 
             try {
+                str=update.getMessage().getChatId();
+                Runnable beeper = new Runnable() {
+                    private SendMessage mes;
+                    public void run() { sendNews(); }
+                };
+                final ScheduledFuture<?> beeperHandle =
+                        scheduler.scheduleAtFixedRate(beeper, 10, 10, SECONDS);
+
+
                 execute(message); // Call method to send the message
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }
         }
     }
+
+    private  void sendNews(){
+        SendMessage message =new SendMessage()
+                .setChatId(str)
+                .setText("My update");
+        try {
+            execute(message); // Call method to send the message
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     //Checking commands
     private static SendMessage generateMessage(Update update) {
@@ -72,6 +106,6 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     public String getBotToken() {
-        return "";
+        return "927149308:AAGUlSpP4ZMC_GzAVXndO1SPTT4diNHj_F8";
     }
 }

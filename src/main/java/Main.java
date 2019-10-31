@@ -6,7 +6,7 @@ import org.telegram.telegrambots.exceptions.TelegramApiRequestException;
 
 public class Main {
 
-    Bot bot;
+
 
     public static void main(String[] args) {
         ApiContextInitializer.init();
