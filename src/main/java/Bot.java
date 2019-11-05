@@ -2,7 +2,9 @@
 import com.vdurmont.emoji.EmojiParser;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Update;
+import org.telegram.telegrambots.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
@@ -34,17 +36,21 @@ public class Bot extends TelegramLongPollingBot {
             message=generateMessage(update);
 
             try {
-                str=update.getMessage().getChatId();
-                Runnable beeper = new Runnable() {
-                    private SendMessage mes;
-                    public void run() { sendNews(); }
-                };
-                final ScheduledFuture<?> beeperHandle =
-                        scheduler.scheduleAtFixedRate(beeper, 10, 10, SECONDS);
-
 
                 execute(message); // Call method to send the message
             } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
+        }else if(update.hasCallbackQuery()){
+            try{
+                SendMessage message = new SendMessage();// Create a SendMessage object with mandatory fields
+                if (update.getCallbackQuery().getData().equals("startSending")){
+                    message.setChatId(update.getCallbackQuery().getMessage().getChatId())
+                            .setText("working");
+                    execute(message);
+                }
+
+            }catch (TelegramApiException e){
                 e.printStackTrace();
             }
         }
@@ -68,7 +74,7 @@ public class Bot extends TelegramLongPollingBot {
         SendMessage message = new SendMessage()
                 .setChatId(update.getMessage().getChatId())
                 .setText("My keyboard")
-                .setReplyMarkup(keybord1());
+                .setReplyMarkup(keybord2());
         if (text.equals("key1")) {
             message.setText(EmojiParser.parseToUnicode(":fire:"));
         }
@@ -97,6 +103,25 @@ public class Bot extends TelegramLongPollingBot {
         row.add("key4");
         buttons.add(row);
         keyboard.setKeyboard(buttons);
+        return keyboard;
+
+    }
+
+    //Creating inline keyboard
+    private static InlineKeyboardMarkup keybord2() {
+        InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup();
+        List<InlineKeyboardButton> buttons = new ArrayList<InlineKeyboardButton>();
+        InlineKeyboardButton button1=new InlineKeyboardButton();
+        button1.setText("Start mailing");
+        button1.setCallbackData("startSending");
+        InlineKeyboardButton button2=new InlineKeyboardButton();
+        button2.setText("Stop mailing");
+        button2.setCallbackData("stopSending");
+        buttons.add(button1);
+        buttons.add(button2);
+        List<List<InlineKeyboardButton>> list=new ArrayList<List<InlineKeyboardButton>>();
+        list.add(buttons);
+        keyboard.setKeyboard(list);
         return keyboard;
 
     }
