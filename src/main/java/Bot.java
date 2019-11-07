@@ -142,15 +142,15 @@ public class Bot extends TelegramLongPollingBot {
         List<Article> list=new ArrayList<Article>();
         try{
             Document doc= Jsoup.connect(url).get();
-            Elements h1Elements=doc.getElementsByAttributeValue("class","l-project-title");
+            Elements h1Elements=doc.getElementsByClass("l-project-title");
             h1Elements.forEach(h1element->{
-                Element element=h1element.child(1);
+                Element element=h1element.getElementsByTag("a").first();
                 String localURL=element.attr("href");
-                String name=element.child(1).text();
+                String name=element.text();
                 list.add(new Article(localURL,name));
             });
         }catch (Exception e){
-            System.out.println("noting to show");
+            System.out.println("Something wrong");
             return null;
         }
 
