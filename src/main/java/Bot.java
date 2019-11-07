@@ -1,5 +1,9 @@
 
 import com.vdurmont.emoji.EmojiParser;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -37,7 +41,7 @@ public class Bot extends TelegramLongPollingBot {
 
             try {
 
-                execute(message); // Call method to send the message
+                execute(sendOffers(getOffers(),update)); // Call method to send the message
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }
@@ -124,6 +128,33 @@ public class Bot extends TelegramLongPollingBot {
         keyboard.setKeyboard(list);
         return keyboard;
 
+    }
+
+    private static SendMessage sendOffers(List<Article> list,Update update){
+        String text = update.getMessage().getText();
+        SendMessage message = new SendMessage()
+                .setChatId(update.getMessage().getChatId())
+                .setText(list.get(0).getName());
+        return message;
+    }
+    private static List<Article> getOffers() {
+        String url="https://freelance.ua/?orders=web-development&page=1&pc=1";
+        List<Article> list=new ArrayList<Article>();
+        try{
+            Document doc= Jsoup.connect(url).get();
+            Elements h1Elements=doc.getElementsByAttributeValue("class","l-project-title");
+            h1Elements.forEach(h1element->{
+                Element element=h1element.child(1);
+                String localURL=element.attr("href");
+                String name=element.child(1).text();
+                list.add(new Article(localURL,name));
+            });
+        }catch (Exception e){
+            System.out.println("noting to show");
+            return null;
+        }
+
+        return list;
     }
 
     public String getBotUsername() {
