@@ -142,7 +142,8 @@ public class Bot extends TelegramLongPollingBot {
         List<Article> list=new ArrayList<Article>();
         try{
             Document doc= Jsoup.connect(url).get();
-            Elements h1Elements=doc.getElementsByAttributeValue("class","l-project-title");
+
+            Elements h1Elements=doc.getElementsByClass("l-project-title");
             h1Elements.forEach(h1element->{
                 Element element=h1element.child(1);
                 String localURL=element.attr("href");
